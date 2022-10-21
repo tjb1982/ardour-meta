@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import List, Optional, Tuple, Union
 
 
-# name, path, created, modified
+# name, id, created, modified
 Session = Tuple[str, str, str, str]
 # name, start, end, text, session_name, session_id, created, modified
 Range = Tuple[str, int, int, str, str, str, str, str]
@@ -27,8 +27,8 @@ def connect(database: str) -> sqlite3.Connection:
 def create_schema(conn: sqlite3.Connection):
     conn.execute("""
     create table if not exists session (
-        name, path, created, modified,
-        primary key (name, path)
+        name, id, created, modified,
+        primary key (name, id)
     )
     """)
     conn.execute("""
@@ -382,21 +382,21 @@ def insert_region(
 def fetch_session(
     conn: sqlite3.Connection,
     name: str, 
-    path: str,
+    id: str,
 ) -> Optional[Session]:
     return conn.execute("""
-        select name, path, created, modified
+        select name, id, created, modified
         from session
         where
             name = ?
-            and path = ?
-        """, (name, path)
+            and id = ?
+        """, (name, id)
     ).fetchone()
 
 
 def insert_session(conn: sqlite3.Connection, session: Session):
     return conn.execute("""
-        insert into session (name, path, created, modified)
+        insert into session (name, id, created, modified)
         values (?,?,?,?)
         """,
         session
@@ -406,15 +406,15 @@ def insert_session(conn: sqlite3.Connection, session: Session):
 def fetch_or_create_session(
     conn: sqlite3.Connection,
     name: str,
-    path: str,
+    id: str,
 ) -> Session:
-    existing_session = fetch_session(conn, name, path)
+    existing_session = fetch_session(conn, name, id)
 
     if existing_session:
         return existing_session
 
     created = datetime.utcnow().isoformat()
-    session: Session = (name, path, created, created)
+    session: Session = (name, id, created, created)
     insert_session(conn, session)
 
     return session
