@@ -11,6 +11,8 @@ Range = Tuple[str, int, int, str, str, str, str, str]
 Region = Tuple[str, int, int, str, str, str, str, str]
 # tag_name, range_name, range_start, range_end
 RangeTag = Tuple[str,str, int, int, str, str]
+# tag_name, range_name, range_start, range_end
+RegionTag = Tuple[str,str, int, int, str, str]
 # Tag = Tuple[str, str]
 
 
@@ -236,7 +238,7 @@ def fetch_or_create_region(
 def fetch_region_tags(
     conn: sqlite3.Connection,
     region: Region,
-) -> List[RangeTag]:
+) -> List[RegionTag]:
     name, start, length, _, session_name, session_id, *_ = region
 
     return conn.execute(
