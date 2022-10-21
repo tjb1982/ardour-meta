@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=65.0"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "ardour_meta"
+version = "0.0.1"
+authors = [
+    {name="Tom Brennan", email = "tjb1982@gmail.com"},
+]
+description = """
+Augment ardour6 with CMS functionality.
+"""
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    # TODO: revisit these and add more
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "pyyaml==6.0",
+]
+
+[project.scripts]
+"ardour-meta" = "ardour_meta.cli.main:main"
+
+
+[project.urls]
+"Homepage" = "http://github.com/tjb1982/ardour_meta"
+
+[tool.setuptools]
+packages = [
+    "ardour_meta",
+    "ardour_meta.cli",
+    "ardour_meta.cli.actions",
+]

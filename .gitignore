@@ -1,0 +1,4 @@
+build/
+*.whl
+*.egg-info/
+.vscode/
