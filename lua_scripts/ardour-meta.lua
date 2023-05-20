@@ -14,11 +14,16 @@ ardour {
 --	}
 --end
 
+-- tjb 0.1.0
+
 function factory (params)
     local SEP = " "
 
-    function session_id()
-        local f = io.open(Session:path() .. ".ardour-meta-id", "a+")
+    local ardour_meta_dir = Session:path() .. "/.ardour-meta"
+    os.execute("mkdir -p " .. ardour_meta_dir)
+
+    function ensure_session_id ()
+        local f = io.open(ardour_meta_dir .. "/session-id", "a+")
         local ts = f:read()
         if ts then
             -- `read` a single line at a time (we only want one)
@@ -31,14 +36,17 @@ function factory (params)
         end
     end
 
-    function base_cmd()
+    function base_cmd ()
+        -- XXX: `user_config_directory(-1)` gives us the path to the user's
+        -- database; i.e., that holds data for all different sessions, not
+        -- just this one.
         return "ardour-meta" .. SEP
         .. "'" .. ARDOUR.user_config_directory(-1) .. "'" .. SEP
         .. "'" .. Session:name() .. "'" .. SEP
-        .. "'" .. session_id() .. "'" .. SEP
+        .. "'" .. ardour_meta_dir .. "'" .. SEP
     end
     
-    function launch_location_editors()
+    function launch_location_editors ()
         local locations = {}
     
         for m in Editor:get_selection().markers:iter() do
@@ -63,7 +71,7 @@ function factory (params)
         end
     end
     
-    function launch_region_editors()
+    function launch_region_editors ()
         regionlist = Editor:get_selection().regions:regionlist()
     
         for r in regionlist:iter() do
@@ -78,7 +86,8 @@ function factory (params)
     end
     
     return function ()
-	    launch_location_editors()
-	    launch_region_editors()
+        ensure_session_id()
+        launch_location_editors()
+        launch_region_editors()
     end
 end

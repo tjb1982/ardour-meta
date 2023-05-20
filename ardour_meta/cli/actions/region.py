@@ -15,9 +15,9 @@ def configure(parser: ArgumentParser):
     )
 
 
-def run(app: Namespace, conn: sqlite3.Connection):
+def run(app: Namespace, conn: sqlite3.Connection, session_id: str):
     session = models.fetch_or_create_session(
-        conn, app.session_name, app.session_id
+        conn, session_id, app.session_name,
     )
 
     region = models.fetch_or_create_region(
@@ -26,11 +26,12 @@ def run(app: Namespace, conn: sqlite3.Connection):
     
     tags = models.fetch_region_tags(conn, region)
 
-    name, start, length, text, *_ = region
+    _, start, length, text, _, created, *_ = region
 
     tag_names, edited_message = editor_session(
+        session,
         app.EDITOR,
-        header=f"Region: {name} (start: {start}, length: {length})",
+        header=f"Region: {app.name} (start: {start}, length: {length})",
         tag_names=[tag[0] for tag in tags],
         text=text,
         separator=app.DOC_SEPARATOR,
@@ -38,17 +39,14 @@ def run(app: Namespace, conn: sqlite3.Connection):
 
     session_ended = datetime.utcnow().isoformat()
 
-    name, start, length, _, created, *_ = region
-
     models.update_region(
         conn,
         (
-            name,
+            app.name,
             start,
             length,
             edited_message,
-            app.session_name,
-            app.session_id,
+            session_id,
             created,
             session_ended,
         ),

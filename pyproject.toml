@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ardour_meta"
-version = "0.0.1"
+version = "0.1.0"
 authors = [
     {name="Tom Brennan", email = "tjb1982@gmail.com"},
 ]

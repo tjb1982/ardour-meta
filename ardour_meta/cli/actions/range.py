@@ -15,9 +15,9 @@ def configure(parser: ArgumentParser):
     )
 
 
-def run(app: Namespace, conn: sqlite3.Connection):
+def run(app: Namespace, conn: sqlite3.Connection, session_id: str):
     session = models.fetch_or_create_session(
-        conn, app.session_name, app.session_id
+        conn, session_id, app.session_name,
     )
 
     range = models.fetch_or_create_range(
@@ -26,15 +26,16 @@ def run(app: Namespace, conn: sqlite3.Connection):
     
     tags = models.fetch_range_tags(conn, range)
 
-    name, start, end, text, *_ = range
+    _, start, end, text, _, created, *_ = range
 
     header = (
-        f"Range: {name} [{start} – {end}]"
+        f"Range: {app.name} [{start} – {end}]"
         if start != end else
-        f"Location: {name} at {start}"
+        f"Location: {app.name} at {start}"
     )
 
     tag_names, edited_message = editor_session(
+        session,
         app.EDITOR,
         header=header,
         tag_names=[tag[0] for tag in tags],
@@ -44,17 +45,14 @@ def run(app: Namespace, conn: sqlite3.Connection):
 
     session_ended = datetime.utcnow().isoformat()
 
-    name, start, end, _, created, *_ = range
-
     models.update_range(
         conn,
         (
-            name,
+            app.name,
             start,
             end,
             edited_message,
-            app.session_name,
-            app.session_id,
+            session_id,
             created,
             session_ended,
         ),
